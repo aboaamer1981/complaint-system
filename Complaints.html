@@ -9,12 +9,12 @@
   
   <!-- نموذج الشكوى -->
   <form id="complaintForm" class="mb-8">
-    <input type="text" id="name" placeholder="الاسم" class="block w-full p-2 mb-2 border rounded">
-    <input type="text" id="school" placeholder="المدرسة" class="block w-full p-2 mb-2 border rounded">
-    <input type="text" id="jobTitle" placeholder="المسمى الوظيفي" class="block w-full p-2 mb-2 border rounded">
-    <input type="text" id="nationalID" placeholder="الرقم القومي" class="block w-full p-2 mb-2 border rounded">
-    <input type="text" id="phone" placeholder="رقم الواتساب" class="block w-full p-2 mb-2 border rounded">
-    <select id="complaintType" class="block w-full p-2 mb-2 border rounded">
+    <input type="text" id="name" placeholder="الاسم" class="block w-full p-2 mb-2 border rounded" required>
+    <input type="text" id="school" placeholder="المدرسة" class="block w-full p-2 mb-2 border rounded" required>
+    <input type="text" id="jobTitle" placeholder="المسمى الوظيفي" class="block w-full p-2 mb-2 border rounded" required>
+    <input type="text" id="nationalID" placeholder="الرقم القومي" class="block w-full p-2 mb-2 border rounded" required>
+    <input type="text" id="phone" placeholder="رقم الواتساب" class="block w-full p-2 mb-2 border rounded" required>
+    <select id="complaintType" class="block w-full p-2 mb-2 border rounded" required>
       <option value="">اختر نوع الشكوى</option>
       <option value="عدم استلام الراتب">عدم استلام الراتب</option>
       <option value="نقص في الراتب">نقص في الراتب</option>
@@ -22,7 +22,7 @@
       <option value="غير مستحق الدعم">غير مستحق الدعم</option>
       <option value="أوراق الأحقية لم تصل">أوراق الأحقية لم تصل</option>
     </select>
-    <textarea id="complaintContent" placeholder="تفاصيل الشكوى" class="block w-full p-2 mb-2 border rounded"></textarea>
+    <textarea id="complaintContent" placeholder="تفاصيل الشكوى" class="block w-full p-2 mb-2 border rounded" required></textarea>
     <button type="submit" class="bg-blue-500 text-white p-2 rounded">إرسال الشكوى</button>
   </form>
 
@@ -40,6 +40,12 @@
       e.preventDefault();
       
       const email = sessionStorage.getItem('userEmail');
+      if (!email) {
+        alert("يجب تسجيل الدخول أولاً.");
+        window.location.href = 'Login.html';
+        return;
+      }
+
       const data = {
         name: document.getElementById('name').value,
         school: document.getElementById('school').value,
@@ -51,43 +57,59 @@
         complaintContent: document.getElementById('complaintContent').value
       };
 
-      const response = await fetch('YOUR_WEB_APP_URL', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbzeafIgSnpfz7-Rres9ubRurANXksQqTeqtqN58NVALuS5GZemSLzSZN2GZQOXVXJ9sHQ/exec', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
 
-      if (response.ok) {
-        alert('تم إرسال الشكوى بنجاح!');
-        document.getElementById('complaintForm').reset();
+        if (response.ok) {
+          alert('تم إرسال الشكوى بنجاح!');
+          document.getElementById('complaintForm').reset();
+          loadComplaints(); // إعادة تحميل الشكاوى بعد الإرسال
+        } else {
+          alert('حدث خطأ أثناء الإرسال. حاول مرة أخرى.');
+        }
+      } catch (error) {
+        console.error("حدث خطأ:", error);
+        alert("فشل الإرسال. تحقق من الاتصال بالإنترنت.");
       }
     });
 
     // جلب الشكاوى من الـ Google Sheet وعرضها
     async function loadComplaints() {
       const email = sessionStorage.getItem('userEmail');
-      const response = await fetch(`https://script.google.com/macros/s/AKfycbzeafIgSnpfz7-Rres9ubRurANXksQqTeqtqN58NVALuS5GZemSLzSZN2GZQOXVXJ9sHQ/exec`);
-      const complaints = await response.json();
+      if (!email) return;
 
-      const openComplaints = complaints.filter(c => c.status === 'جديدة' || c.status === 'قيد الفحص');
-      const closedComplaints = complaints.filter(c => c.status === 'مغلقة');
+      try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbzeafIgSnpfz7-Rres9ubRurANXksQqTeqtqN58NVALuS5GZemSLzSZN2GZQOXVXJ9sHQ/exec');
+        const complaints = await response.json();
 
-      // عرض الشكاوى المفتوحة
-      document.getElementById('openComplaints').innerHTML = openComplaints.map(c => `
-        <div class="border p-2 mb-2 rounded">
-          <p><strong>رقم الشكوى:</strong> ${c.complaintID}</p>
-          <p><strong>التفاصيل:</strong> ${c.complaintContent}</p>
-          <p><strong>الحالة:</strong> ${c.status}</p>
-        </div>
-      `).join('');
+        // فصل الشكاوى المفتوحة والمغلقة
+        const openComplaints = complaints.filter(c => c.status === 'جديدة' || c.status === 'قيد الفحص');
+        const closedComplaints = complaints.filter(c => c.status === 'مغلقة');
 
-      // عرض الشكاوى المغلقة
-      document.getElementById('closedComplaints').innerHTML = closedComplaints.map(c => `
-        <div class="border p-2 mb-2 rounded">
-          <p><strong>رقم الشكوى:</strong> ${c.complaintID}</p>
-          <p><strong>الرد:</strong> ${c.response}</p>
-        </div>
-      `).join('');
+        // عرض الشكاوى المفتوحة
+        document.getElementById('openComplaints').innerHTML = openComplaints.map(c => `
+          <div class="border p-2 mb-2 rounded">
+            <p><strong>رقم الشكوى:</strong> ${c.complaintID}</p>
+            <p><strong>التفاصيل:</strong> ${c.complaintContent}</p>
+            <p><strong>الحالة:</strong> ${c.status}</p>
+          </div>
+        `).join('');
+
+        // عرض الشكاوى المغلقة
+        document.getElementById('closedComplaints').innerHTML = closedComplaints.map(c => `
+          <div class="border p-2 mb-2 rounded">
+            <p><strong>رقم الشكوى:</strong> ${c.complaintID}</p>
+            <p><strong>الرد:</strong> ${c.response || 'لا يوجد رد'}</p>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error("حدث خطأ أثناء تحميل الشكاوى:", error);
+        alert("فشل تحميل الشكاوى. تحقق من الاتصال بالإنترنت.");
+      }
     }
 
     // تحميل الشكاوى عند فتح الصفحة
