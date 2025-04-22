@@ -5,19 +5,24 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-  <h1>مرحباً! سجل دخولك</h1>
+  <h1>مرحبًا! سجل دخولك</h1>
   <div id="g_id_onload"
-  data-client_id="723657748342-2app3eoq4buis1ckjqntvcnb373o55t6.apps.googleusercontent.com"
+    data-client_id="723657748342-2app3eoq4buis1ckjqntvcnb373o55t6.apps.googleusercontent.com"
     data-callback="handleCredentialResponse">
   </div>
   <div class="g_id_signin" data-type="standard"></div>
 
   <script>
     function handleCredentialResponse(response) {
-      const email = response.credential.split('.')[1];
-      const decodedEmail = JSON.parse(atob(email)).email;
-      sessionStorage.setItem('userEmail', decodedEmail);
-      window.location.href = 'complaints.html';
+      try {
+        const email = response.credential.split('.')[1];
+        const decodedEmail = JSON.parse(atob(email)).email;
+        sessionStorage.setItem('userEmail', decodedEmail);
+        window.location.href = 'Complaints.html';
+      } catch (error) {
+        console.error("حدث خطأ أثناء استخراج البريد الإلكتروني:", error);
+        alert("حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.");
+      }
     }
   </script>
 </body>
