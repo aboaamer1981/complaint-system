@@ -7,14 +7,13 @@
 <body>
   <h1>مرحباً! سجل دخولك</h1>
   <div id="g_id_onload"
-    data-client_id="https://aboaamer1981.github.io/complaint-system/"
+    data-client_id="723657748342-2app3eoq4buis1ckjqntvcnb373o55t6.apps.googleusercontent.com"  <!-- استبدل هذا بالـ Client ID الحقيقي -->
     data-callback="handleCredentialResponse">
   </div>
   <div class="g_id_signin" data-type="standard"></div>
 
   <script>
     function handleCredentialResponse(response) {
-      // استخراج البريد الإلكتروني من رد Google
       const email = response.credential.split('.')[1];
       const decodedEmail = JSON.parse(atob(email)).email;
       sessionStorage.setItem('userEmail', decodedEmail);
