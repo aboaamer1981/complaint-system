@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>تسجيل الدخول</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <h1>مرحباً! سجل دخولك</h1>
+  <div id="g_id_onload"
+    data-client_id="YOUR_CLIENT_ID.apps.googleusercontent.com"
+    data-callback="handleCredentialResponse">
+  </div>
+  <div class="g_id_signin" data-type="standard"></div>
+
+  <script>
+    function handleCredentialResponse(response) {
+      // استخراج البريد الإلكتروني من رد Google
+      const email = response.credential.split('.')[1];
+      const decodedEmail = JSON.parse(atob(email)).email;
+      sessionStorage.setItem('userEmail', decodedEmail);
+      window.location.href = 'complaints.html';
+    }
+  </script>
+</body>
+</html>

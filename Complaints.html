@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>الشكاوى</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-4">
+  <h1 class="text-2xl font-bold mb-4">تقديم شكوى</h1>
+  
+  <!-- نموذج الشكوى -->
+  <form id="complaintForm" class="mb-8">
+    <input type="text" id="name" placeholder="الاسم" class="block w-full p-2 mb-2 border rounded">
+    <input type="text" id="school" placeholder="المدرسة" class="block w-full p-2 mb-2 border rounded">
+    <input type="text" id="jobTitle" placeholder="المسمى الوظيفي" class="block w-full p-2 mb-2 border rounded">
+    <input type="text" id="nationalID" placeholder="الرقم القومي" class="block w-full p-2 mb-2 border rounded">
+    <input type="text" id="phone" placeholder="رقم الواتساب" class="block w-full p-2 mb-2 border rounded">
+    <select id="complaintType" class="block w-full p-2 mb-2 border rounded">
+      <option value="">اختر نوع الشكوى</option>
+      <option value="عدم استلام الراتب">عدم استلام الراتب</option>
+      <option value="نقص في الراتب">نقص في الراتب</option>
+      <option value="تأخير في نزول الراتب">تأخير في نزول الراتب</option>
+      <option value="غير مستحق الدعم">غير مستحق الدعم</option>
+      <option value="أوراق الأحقية لم تصل">أوراق الأحقية لم تصل</option>
+    </select>
+    <textarea id="complaintContent" placeholder="تفاصيل الشكوى" class="block w-full p-2 mb-2 border rounded"></textarea>
+    <button type="submit" class="bg-blue-500 text-white p-2 rounded">إرسال الشكوى</button>
+  </form>
+
+  <!-- عرض الشكاوى المفتوحة -->
+  <h2 class="text-xl font-bold mb-2">الشكاوى المفتوحة</h2>
+  <div id="openComplaints" class="mb-8"></div>
+
+  <!-- عرض الشكاوى المغلقة -->
+  <h2 class="text-xl font-bold mb-2">الشكاوى المغلقة</h2>
+  <div id="closedComplaints"></div>
+
+  <script>
+    // إرسال البيانات إلى الـ Web App
+    document.getElementById('complaintForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = sessionStorage.getItem('userEmail');
+      const data = {
+        name: document.getElementById('name').value,
+        school: document.getElementById('school').value,
+        jobTitle: document.getElementById('jobTitle').value,
+        nationalID: document.getElementById('nationalID').value,
+        phone: document.getElementById('phone').value,
+        email: email,
+        complaintType: document.getElementById('complaintType').value,
+        complaintContent: document.getElementById('complaintContent').value
+      };
+
+      const response = await fetch('YOUR_WEB_APP_URL', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        alert('تم إرسال الشكوى بنجاح!');
+        document.getElementById('complaintForm').reset();
+      }
+    });
+
+    // جلب الشكاوى من الـ Google Sheet وعرضها
+    async function loadComplaints() {
+      const email = sessionStorage.getItem('userEmail');
+      const response = await fetch(`YOUR_WEB_APP_URL?email=${email}`);
+      const complaints = await response.json();
+
+      const openComplaints = complaints.filter(c => c.status === 'جديدة' || c.status === 'قيد الفحص');
+      const closedComplaints = complaints.filter(c => c.status === 'مغلقة');
+
+      // عرض الشكاوى المفتوحة
+      document.getElementById('openComplaints').innerHTML = openComplaints.map(c => `
+        <div class="border p-2 mb-2 rounded">
+          <p><strong>رقم الشكوى:</strong> ${c.complaintID}</p>
+          <p><strong>التفاصيل:</strong> ${c.complaintContent}</p>
+          <p><strong>الحالة:</strong> ${c.status}</p>
+        </div>
+      `).join('');
+
+      // عرض الشكاوى المغلقة
+      document.getElementById('closedComplaints').innerHTML = closedComplaints.map(c => `
+        <div class="border p-2 mb-2 rounded">
+          <p><strong>رقم الشكوى:</strong> ${c.complaintID}</p>
+          <p><strong>الرد:</strong> ${c.response}</p>
+        </div>
+      `).join('');
+    }
+
+    // تحميل الشكاوى عند فتح الصفحة
+    loadComplaints();
+  </script>
+</body>
+</html>
