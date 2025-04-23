@@ -1,71 +1,120 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
-  <title>الشكاوى</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة الشكاوى</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="p-4">
-  <h1 class="text-2xl font-bold mb-4">تقديم شكوى</h1>
-  
-  <!-- نموذج الشكوى -->
-  <form id="complaintForm" class="mb-8">
-    <input type="text" id="name" placeholder="الاسم" class="block w-full p-2 mb-2 border rounded" required>
-    <input type="text" id="school" placeholder="المدرسة" class="block w-full p-2 mb-2 border rounded" required>
-    <input type="text" id="jobTitle" placeholder="المسمى الوظيفي" class="block w-full p-2 mb-2 border rounded" required>
-    <input type="text" id="nationalID" placeholder="الرقم القومي" class="block w-full p-2 mb-2 border rounded" required>
-    <input type="text" id="phone" placeholder="رقم الواتساب" class="block w-full p-2 mb-2 border rounded" required>
-    <select id="complaintType" class="block w-full p-2 mb-2 border rounded" required>
-      <option value="">اختر نوع الشكوى</option>
-      <option value="عدم استلام الراتب">عدم استلام الراتب</option>
-      <option value="نقص في الراتب">نقص في الراتب</option>
-      <option value="تأخير في نزول الراتب">تأخير في نزول الراتب</option>
-      <option value="غير مستحق الدعم">غير مستحق الدعم</option>
-      <option value="أوراق الأحقية لم تصل">أوراق الأحقية لم تصل</option>
-    </select>
-    <textarea id="complaintContent" placeholder="تفاصيل الشكوى" class="block w-full p-2 mb-2 border rounded" required></textarea>
-    <button type="submit" class="bg-blue-500 text-white p-2 rounded">إرسال الشكوى</button>
-  </form>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+  <div class="bg-white shadow-lg rounded-lg p-6 max-w-lg w-full">
+    <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">تقديم شكوى</h1>
+
+    <!-- نموذج الشكوى -->
+    <form id="complaintForm" class="space-y-4">
+      <div>
+        <label class="block font-semibold">الاسم:</label>
+        <input type="text" id="name" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل اسمك" required>
+      </div>
+      
+      <div>
+        <label class="block font-semibold">المدرسة:</label>
+        <input type="text" id="school" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل اسم المدرسة" required>
+      </div>
+      
+      <div>
+        <label class="block font-semibold">المسمى الوظيفي:</label>
+        <input type="text" id="jobTitle" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل المسمى الوظيفي" required>
+      </div>
+      
+      <div>
+        <label class="block font-semibold">الرقم القومي:</label>
+        <input type="text" id="nationalID" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل الرقم القومي" required>
+      </div>
+      
+      <div>
+        <label class="block font-semibold">رقم الواتساب:</label>
+        <input type="text" id="phone" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل رقم الواتساب" required>
+      </div>
+      
+      <div>
+        <label class="block font-semibold">نوع الشكوى:</label>
+        <select id="complaintType" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          <option value="" disabled selected>اختر نوع الشكوى</option>
+          <option value="عدم استلام الراتب">عدم استلام الراتب</option>
+          <option value="نقص في الراتب">نقص في الراتب</option>
+          <option value="تأخير في نزول الراتب">تأخير في نزول الراتب</option>
+          <option value="غير مستحق الدعم">غير مستحق الدعم</option>
+          <option value="أوراق الأحقية لم تصل">أوراق الأحقية لم تصل</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-semibold">تفاصيل الشكوى:</label>
+        <textarea id="complaintContent" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل تفاصيل الشكوى" required></textarea>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white font-semibold p-3 rounded-lg hover:bg-blue-700 transition-all">إرسال الشكوى</button>
+    </form>
+
+    <p id="successMessage" class="hidden text-green-600 font-bold text-center mt-4">تم إرسال الشكوى بنجاح! سنقوم بالرد قريبًا.</p>
+  </div>
 
   <script>
     document.getElementById('complaintForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const email = sessionStorage.getItem('userEmail');
-      if (!email) {
+      if (!email || email.trim() === "") {
         alert("يجب تسجيل الدخول أولاً.");
         window.location.href = 'Login.html';
         return;
       }
 
       const data = {
-        name: document.getElementById('name').value,
-        school: document.getElementById('school').value,
-        jobTitle: document.getElementById('jobTitle').value,
-        nationalID: document.getElementById('nationalID').value,
-        phone: document.getElementById('phone').value,
+        name: document.getElementById('name').value.trim(),
+        school: document.getElementById('school').value.trim(),
+        jobTitle: document.getElementById('jobTitle').value.trim(),
+        nationalID: document.getElementById('nationalID').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
         email: email,
-        complaintType: document.getElementById('complaintType').value,
-        complaintContent: document.getElementById('complaintContent').value
+        complaintType: document.getElementById('complaintType').value.trim(),
+        complaintContent: document.getElementById('complaintContent').value.trim()
       };
 
+      for (const key in data) {
+        if (!data[key]) {
+          alert(`يرجى إدخال جميع الحقول المطلوبة.`);
+          return;
+        }
+      }
+
       try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbyjfsj9obKlt1XLuIA_hif7umGDSLNndIRarPei6M374H8BBDW7xPJWL3l9hphJvCPy/exec', {
+        const response = await fetch('https://script.google.com/macros/s/YOUR_SCRIPT_URL/exec', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
 
-        if (response.ok) {
-          alert('تم إرسال الشكوى بنجاح!');
-          document.getElementById('complaintForm').reset();
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          document.getElementById('complaintForm').style.display = 'none';
+          document.getElementById('successMessage').classList.remove('hidden');
         } else {
-          alert('حدث خطأ أثناء الإرسال. حاول مرة أخرى.');
+          alert(`خطأ: ${result.error || "حدث خطأ غير متوقع"}`);
         }
       } catch (error) {
         console.error("حدث خطأ:", error);
-        alert("فشل الإرسال. تحقق من الاتصال بالإنترنت.");
+        alert("فشل الإرسال. تحقق من الاتصال بالإنترنت أو حاول لاحقًا.");
       }
     });
   </script>
+
 </body>
 </html>

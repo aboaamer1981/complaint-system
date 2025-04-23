@@ -3,22 +3,30 @@
 <head>
   <title>تسجيل الدخول</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jwt-decode/3.1.2/jwt-decode.min.js"></script>
 </head>
 <body>
   <h1>مرحباً! سجل دخولك</h1>
+  
   <div id="g_id_onload"
     data-client_id="723657748342-2app3eoq4buis1ckjqntvcnb373o55t6.apps.googleusercontent.com"
     data-callback="handleCredentialResponse">
   </div>
+  
   <div class="g_id_signin" data-type="standard"></div>
 
   <script>
     function handleCredentialResponse(response) {
       try {
-        const email = response.credential.split('.')[1];
-        const decodedEmail = JSON.parse(atob(email)).email;
-        sessionStorage.setItem('userEmail', decodedEmail);
-        window.location.href = 'Complaints.html';
+        const user = jwt_decode(response.credential); // فك تشفير بيانات المستخدم
+        const userEmail = user.email;
+
+        if (userEmail) {
+          sessionStorage.setItem('userEmail', userEmail);
+          window.location.href = 'Complaints.html';
+        } else {
+          throw new Error("لم يتم استخراج البريد الإلكتروني.");
+        }
       } catch (error) {
         console.error("حدث خطأ:", error);
         alert("فشل تسجيل الدخول. حاول مرة أخرى.");
